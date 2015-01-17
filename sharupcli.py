@@ -127,7 +127,7 @@ def on_open(ws):
                 break
 
         try: ws.close()
-        finally: os._exit(1)
+        finally: os._exit(0)
 
     def THREADED_pinger(*args):
         # ping to not timeout
