@@ -33,6 +33,11 @@ MESSAGE_DATA = {
     "type": 3
 }
 
+COMMAND_DATA = {
+    "commandMessage": "{{/msg/}}", 
+    "type": 4
+}
+
 STATUS_CHANGE_DATA = {
     "newStatus": 4,
     "type": 10
@@ -49,12 +54,25 @@ def on_message(ws, message):
     msg = json.loads(message)
     t = msg['type']
 
-    if t == 1:
-        print "-- you have signed in #" + CHAN
+    if t == 11: # status change, away etc.
+        sender = msg['clientInfo']['nick']
+        newStatus = msg['newStatus']
+        if newStatus == 3:
+            print "-- " + sender + " is away..."
+        if newStatus == 4 and sender != NICK:
+            print "-- " + sender + " is a terminal user!"
         return
 
-    if t == 11: # status change
-        return
+    if t == 1:
+        print "-- you have signed in #" + CHAN
+
+    if t == 6: # moo etc.
+        sender = msg['clientInfo']['nick']
+        print "-- " + sender + " commanded " + msg['command']
+
+    if t == 7:
+        sender = msg['clientInfo']['nick']
+        print "-- " + sender + " is listening to some Futurama!"
 
     if t == 8 or t == 9: # user joined (8) / parted (9)
         present = "-- " + msg['clientInfo']['nick']
@@ -62,13 +80,13 @@ def on_message(ws, message):
             present += " has joined"
         if t == 9:
             present += " has left"
-        present += " \t-- present users: "
+        present += "\t\t\t(present users: "
         for p in msg['allClients']:
             present += p['nick'] + ", "
-        print present
+        print present[:-2] + ")"
 
     if t == 5: # channel message
-        sys.stdout.write('\r')
+        #sys.stdout.write('\r')
         sender = msg["clientInfo"]["nick"]
         print "<"+sender+">", msg["message"]
 
@@ -93,7 +111,14 @@ def on_open(ws):
                 print e
                 break
 
-            message_msg = impl_message(MESSAGE_DATA)
+            if len(t) == 0:
+                continue
+
+            if t[:1] != '/':
+                message_msg = impl_message(MESSAGE_DATA)
+            else:
+                message_msg = impl_message(COMMAND_DATA)
+
             message_msg = message_msg.replace("{{/msg/}}", t)
 
             try: 
