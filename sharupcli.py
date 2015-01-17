@@ -1,14 +1,15 @@
-import websocket
+import websocket # `pip install websocket-client`
 import thread
 import time
 import json
 import sys
 import os
 
+
 # ----------
 usage = """sharup client 0.4
-usage:  sharupcli  <nickname>  <#channel>  <gravatar>
-e.g:    sharupcli john #johnfriends john.doe@gravatar.com"""
+usage:  sharupcli  <nickname>  <channel>  <gravatar>
+e.g:    sharupcli john johnfriends john.doe@gravatar.com"""
 
 if len(sys.argv) != 4:
     print usage
@@ -18,7 +19,7 @@ _, NICK, CHAN, GRAVATAR = sys.argv
 
 LOGIN_DATA = {
     "channel": {
-        "name": "{{/chan/}}"
+        "name": "#{{/chan/}}"
     },
     "nick": "{{/nick/}}",
     "email": "{{/mail/}}",
@@ -26,10 +27,13 @@ LOGIN_DATA = {
 }
 
 MESSAGE_DATA = {
-    "channel": {
-        "name": "{{/chan/}}"
-    },
-    "message": "{{/msg/}}", "type": 3
+    "message": "{{/msg/}}", 
+    "type": 3
+}
+
+STATUS_CHANGE_DATA = {
+    "newStatus": 4,
+    "type": 10
 }
 
 def impl_message(message_object):
@@ -40,16 +44,24 @@ def impl_message(message_object):
     return msg
 
 def on_message(ws, message):
-    res = json.loads(message)
-    t = res['type']
+    msg = json.loads(message)
+    t = msg['type']
 
     if t == 11: # status change
         return
 
+    if t == 8: # user joined
+        print "--", msg['clientInfo']['nick'], "has joined"
+        return
+
+    if t == 9: # user parted
+        print "--", msg['clientInfo']['nick'], "has left"
+        return
+
     if t == 5: # channel message
         sys.stdout.write('\r')
-        sender = res["clientInfo"]["nick"]
-        print "<"+sender+">", res["message"]
+        sender = msg["clientInfo"]["nick"]
+        print "<"+sender+">", msg["message"]
 
 def on_error(ws, error):
     print "got error!!!", error
@@ -83,7 +95,15 @@ def on_open(ws):
         try: ws.close()
         finally: os._exit(1)
 
+    def THREADED_pinger(*args):
+        while 1:
+            pingmsg = impl_message(STATUS_CHANGE_DATA)
+            ws.send(pingmsg)
+            print "pinging"
+            time.sleep(20)
+
     thread.start_new_thread(THREADED_run, ())
+    thread.start_new_thread(THREADED_pinger, ())
 
 websocket.enableTrace(False)
 ws = websocket.WebSocketApp("ws://sharup.com:8080",
