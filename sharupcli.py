@@ -59,8 +59,6 @@ def on_message(ws, message):
         newStatus = msg['newStatus']
         if newStatus == 3:
             print "-- " + sender + " is away..."
-        if newStatus == 4 and sender != NICK:
-            print "-- " + sender + " is a terminal user!"
         return
 
     if t == 1:
@@ -82,6 +80,8 @@ def on_message(ws, message):
             present += " has left"
         present += "\t\t\t(present users: "
         for p in msg['allClients']:
+            if p['status'] == 4 :
+                present += "*"
             present += p['nick'] + ", "
         print present[:-2] + ")"
 
