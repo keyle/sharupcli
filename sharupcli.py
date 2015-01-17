@@ -70,7 +70,7 @@ def on_message(ws, message):
 
     if t == 7:
         sender = msg['clientInfo']['nick']
-        print "-- " + sender + " is listening to some Futurama!"
+        print "-- " + sender + " wants to hear some Futurama!"
 
     if t == 8 or t == 9: # user joined (8) / parted (9)
         present = "-- " + msg['clientInfo']['nick']
