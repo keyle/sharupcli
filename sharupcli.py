@@ -4,6 +4,8 @@ import time
 import json
 import sys
 import os
+import logging
+logging.basicConfig()
 
 
 # ----------
@@ -47,16 +49,23 @@ def on_message(ws, message):
     msg = json.loads(message)
     t = msg['type']
 
+    if t == 1:
+        print "-- you have signed in #" + CHAN
+        return
+
     if t == 11: # status change
         return
 
-    if t == 8: # user joined
-        print "--", msg['clientInfo']['nick'], "has joined"
-        return
-
-    if t == 9: # user parted
-        print "--", msg['clientInfo']['nick'], "has left"
-        return
+    if t == 8 or t == 9: # user joined (8) / parted (9)
+        present = "-- " + msg['clientInfo']['nick']
+        if t == 8:
+            present += " has joined"
+        if t == 9:
+            present += " has left"
+        present += " \t-- present users: "
+        for p in msg['allClients']:
+            present += p['nick'] + ", "
+        print present
 
     if t == 5: # channel message
         sys.stdout.write('\r')
@@ -96,11 +105,11 @@ def on_open(ws):
         finally: os._exit(1)
 
     def THREADED_pinger(*args):
+        # ping to not timeout
         while 1:
             pingmsg = impl_message(STATUS_CHANGE_DATA)
             ws.send(pingmsg)
-            print "pinging"
-            time.sleep(20)
+            time.sleep(121)
 
     thread.start_new_thread(THREADED_run, ())
     thread.start_new_thread(THREADED_pinger, ())
