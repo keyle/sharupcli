@@ -7,6 +7,16 @@ import os
 import logging
 logging.basicConfig()
 
+try: 
+    import winsound
+except ImportError:
+    def playsound():
+        print '\a'
+else:
+    def playsound():
+        winsound.Beep(220, 50)
+        #winsound.Beep(4800, 35)
+
 usage = """sharup client 0.4
 usage:  sharupcli  <nickname>  <channel>  <gravatar>
 e.g:    sharupcli john johnfriends john.doe@gravatar.com"""
@@ -16,6 +26,8 @@ if len(sys.argv) != 4:
     sys.exit()
 
 _, NICK, CHAN, GRAVATAR = sys.argv
+
+
 
 # ----------
 
@@ -91,6 +103,7 @@ def on_message(ws, message):
         #sys.stdout.write('\r')
         sender = msg["clientInfo"]["nick"]
         print "<"+sender+">", msg["message"]
+        playsound()
 
 def on_error(ws, error):
     print "got error!!!", error
