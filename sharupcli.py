@@ -129,6 +129,8 @@ def on_open(ws):
             if len(t) == 0:
                 continue
 
+            t = t.replace('"', '\\"')
+
             if t[:1] != '/':
                 message_msg = impl_message(MESSAGE_DATA)
             else:
