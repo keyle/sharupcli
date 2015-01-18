@@ -7,8 +7,6 @@ import os
 import logging
 logging.basicConfig()
 
-
-# ----------
 usage = """sharup client 0.4
 usage:  sharupcli  <nickname>  <channel>  <gravatar>
 e.g:    sharupcli john johnfriends john.doe@gravatar.com"""
@@ -18,6 +16,8 @@ if len(sys.argv) != 4:
     sys.exit()
 
 _, NICK, CHAN, GRAVATAR = sys.argv
+
+# ----------
 
 LOGIN_DATA = {
     "channel": {
@@ -42,6 +42,8 @@ STATUS_CHANGE_DATA = {
     "newStatus": 4,
     "type": 10
 }
+
+# ----------
 
 def impl_message(message_object):
     msg = json.dumps(message_object)
