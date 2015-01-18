@@ -11,7 +11,7 @@ try:
     import winsound
 except ImportError:
     def playsound():
-        print '\a'
+        sys.stdout.write('\a')
 else:
     def playsound():
         winsound.Beep(220, 50)
@@ -101,9 +101,9 @@ def on_message(ws, message):
 
     if t == 5: # channel message
         #sys.stdout.write('\r')
+        playsound()
         sender = msg["clientInfo"]["nick"]
         print "<"+sender+">", msg["message"]
-        playsound()
 
 def on_error(ws, error):
     print "got error!!!", error
