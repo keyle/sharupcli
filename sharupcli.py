@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import websocket # `pip install websocket-client`
 import thread
 import time
@@ -15,7 +16,6 @@ except ImportError:
 else:
     def playsound():
         winsound.Beep(220, 50)
-        #winsound.Beep(4800, 35)
 
 usage = """sharup client 0.4
 usage:  sharupcli  <nickname>  <channel>  <gravatar>
@@ -100,10 +100,10 @@ def on_message(ws, message):
         print present[:-2] + ")"
 
     if t == 5: # channel message
-        #sys.stdout.write('\r')
         playsound()
         sender = msg["clientInfo"]["nick"]
-        print "<"+sender+">", msg["message"]
+        message = msg["message"].encode("utf8")
+        print "<"+sender+">", message
 
 def on_error(ws, error):
     print "got error!!!", error
@@ -130,6 +130,7 @@ def on_open(ws):
                 continue
 
             t = t.replace('"', '\\"')
+            t = t.replace('’', "\\'")
 
             if t[:1] != '/':
                 message_msg = impl_message(MESSAGE_DATA)
